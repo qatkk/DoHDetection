@@ -1,1 +1,3 @@
 # DoHDetection
+
+The same procedure as the paper "DoH Insight: Detecting DNS over HTTPS by Machine Learning" has been applied to their dataset synthesized in chrome. After doing so the accuracies for a 5-NN and a random forest was 99.23 and 99.62 respectively. These values are close to the ones reported in the paper (99.6 and 99.9) but less which is reasonable due to the training being done on lesser amount of data. 
