@@ -1,0 +1,5 @@
+timestamp,source_ip,destination_ip,http_payload,protocol
+2025-01-05 13:15:03.623056,192.168.64.11,194.156.155.239,No payload,DNS-over-HTTPS
+2025-01-05 13:15:03.638273,194.156.155.239,192.168.64.11,No payload,DNS-over-HTTPS
+2025-01-05 13:15:09.196002,192.168.64.11,217.146.1.31,No payload,DNS-over-HTTPS
+2025-01-05 13:15:09.216537,217.146.1.31,192.168.64.11,No payload,DNS-over-HTTPS
