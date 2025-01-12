@@ -1,0 +1,328 @@
+(function() {
+    'use strict';
+
+    function onload() {
+        // Initialize Header
+        headerInit();
+
+        // Fix unstyled wagtail bar
+        const wbar = document.getElementsByTagName('wagtail-userbar');
+        if (wbar[0]) {
+            wbar[0].classList.remove('wagtail-user-bar-loading');
+        }
+    }
+
+    const newsLetterToast = () => {
+        const toastEl = document.querySelector('#newsletter-toast');
+        const footerEl = document.querySelector('footer');
+
+        if (toastEl) {
+            const onScroll = function() {
+                const documentHeight = document.documentElement.scrollHeight;
+                const scrollPosition = window.scrollY + window.innerHeight;
+
+                if (scrollPosition > documentHeight / 2) {
+                    toastEl.style.bottom = '0px';
+                    toastEl.style.visibility = 'visible';
+                    adjustFooterPadding();
+                }
+            };
+
+            window.addEventListener('scroll', onScroll);
+
+            const declineButton = document.querySelector('.newsletter-toast__cta--no');
+            if (declineButton) {
+                declineButton.addEventListener('click', function() {
+                    const expiryDate = new Date();
+                    expiryDate.setMonth(expiryDate.getMonth() + 1);
+                    const suscriptionDeclined = {
+                        value: true,
+                        expiry: expiryDate
+                    };
+                    localStorage.setItem('suscriptionDeclined', JSON.stringify(suscriptionDeclined));
+                    window.removeEventListener('scroll', onScroll);
+                    toastEl.style.visibility = 'hidden';
+                    toastEl.style.bottom = `-${toastEl.offsetHeight}px`;
+                    resetFooterPadding();
+                });
+            }
+        }
+
+        const adjustFooterPadding = () => {
+            if (footerEl) {
+                footerEl.style.paddingBottom = `${toastEl.offsetHeight}px`;
+            }
+        }
+
+        const resetFooterPadding = () => {
+            if (footerEl) {
+                footerEl.style.paddingBottom = '0px';
+            }
+        }
+
+        window.addEventListener('resize', adjustFooterPadding);
+    }
+
+    const headerInit = () => {
+        // elements
+        const body = document.querySelector('body');
+
+        const hamburger = document.querySelector('.hamburger');
+        const filterHamburger = document.querySelector('#filter-burger');
+
+        const drawer = document.querySelector('.mobile-drawer');
+        const filterDrawer = document.querySelector('.mobile-drawer.filter-drawer')
+        const backdrop = document.querySelector('.backdrop');
+        const filterBackdrop = document.querySelector('.backdrop.filter-backdrop');
+
+        const mobileNavCloseBtn = document.querySelector('.nav-close-btn');
+        const mobileBackCloseBtn = document.querySelector('.nav-back-btn');
+
+        const productsSubmenuTrigger = document.querySelector('.products-btn');
+        const communitySubmenuTrigger = document.querySelector('.community-btn');
+
+        const productsSubmenu = document.querySelector('.products-submenu');
+        const communitySubmenu = document.querySelector('.community-submenu');
+
+        const navWrapper = document.querySelector('.nav-wrapper');
+
+        // get nav items that are dropdowns (desktop)
+        const dropdownNavItems = document.querySelectorAll('[dropdown]');
+
+        const upperTabsWrapper = document.querySelector('.upper-tabs');
+
+        const languageDropdowns = document.querySelectorAll('.language-selector > button');
+        // local helpers
+
+        const toggleDrawer = () => {
+            drawer.classList.toggle('open');
+            backdrop.classList.toggle('show');
+            body.classList.toggle('mobile-drawer-show');
+
+            if (!drawer.hasAttribute('top-level-nav')) {
+                toggleSubmenu('products')
+            }
+        }
+
+        const toggleFilterDrawer = () => {
+            filterDrawer.classList.toggle('open');
+            filterBackdrop.classList.toggle('show');
+            body.classList.toggle('mobile-drawer-show');
+        }
+
+        const toggleSubmenu = (type) => {
+            mobileNavCloseBtn.classList.toggle('hidden');
+            mobileBackCloseBtn.classList.toggle('hidden');
+
+            drawer.toggleAttribute('top-level-nav');
+
+            if (type === 'products') {
+                if (productsSubmenu.classList.contains('hidden')) {
+                    productsSubmenu.classList.remove('hidden');
+                    communitySubmenu.classList.add('hidden');
+                }
+            } else if (type === 'community') {
+                if (communitySubmenu.classList.contains('hidden')) {
+                    communitySubmenu.classList.remove('hidden');
+                    productsSubmenu.classList.add('hidden');
+                }
+            }
+
+            navWrapper.classList.toggle('ltr');
+
+        }
+
+        const openDeskSubmenu = (item) => {
+            const dropdown = item.querySelector('.tabs-dropdown');
+
+            // check if the dropdown is not null and if it overflows the document
+            if (dropdown && dropdown.getBoundingClientRect().right > window.innerWidth) {
+                dropdown.style.right = '-6px';
+                dropdown.style.left = 'unset';
+            }
+
+            // add dropdown--open to upperTabsWrapper and dropdown item
+            upperTabsWrapper.setAttribute('dropdown--open', '');
+            item.setAttribute('dropdown--open', '');
+
+            // find .tabs-dropdown-content inside of the dropdown item and add .open
+            const dropdownContent = item.querySelector('.tabs-dropdown-content');
+            dropdownContent.classList.add('open');
+
+            // get the .dropdown-toggle inside of the dropdown item and toggle aria-expanded
+            const dropdownToggle = item.querySelector('.dropdown-toggle');
+            dropdownToggle.setAttribute('aria-expanded', 'true');
+
+            // rotate 180 the svg inside dropdownToggle
+            const svg = dropdownToggle.querySelector('svg');
+            svg.style.transform = 'rotate(180deg)';
+        }
+
+        const resetDeskSubmenu = (item) => {
+            const dropdownContent = item.querySelector('.tabs-dropdown-content');
+            dropdownContent.classList.remove('open');
+
+            //reset svg rotation
+            const svg = item.querySelector('svg');
+            svg.style.transform = 'rotate(0deg)';
+
+            upperTabsWrapper.removeAttribute('dropdown--open');
+            item.removeAttribute('dropdown--open');
+
+
+            const dropdownToggle = item.querySelector('.dropdown-toggle');
+            dropdownToggle.setAttribute('aria-expanded', 'false');
+
+            const dropdown = item.querySelector('.tabs-dropdown');
+
+            if (dropdown) {
+                // remove the inline style
+                dropdown.style.right = '';
+                dropdown.style.left = '';
+            }
+        }
+
+        // listeners
+
+        hamburger.addEventListener('click', toggleDrawer);
+        filterHamburger?.addEventListener('click', toggleFilterDrawer)
+        backdrop.addEventListener('click', toggleDrawer);
+        filterBackdrop?.addEventListener('click', toggleFilterDrawer)
+
+        mobileNavCloseBtn.addEventListener('click', toggleDrawer);
+        mobileBackCloseBtn.addEventListener('click', () => toggleSubmenu('products'));
+
+        productsSubmenuTrigger.addEventListener('click', () => toggleSubmenu('products'));
+        communitySubmenuTrigger.addEventListener('click', () => toggleSubmenu('community'));
+
+        productsSubmenuTrigger.addEventListener('keydown', (event) => {
+            if (event.key === " " || event.key === "Enter") {
+                event.preventDefault();
+                toggleSubmenu('products');
+            }
+        });
+
+        communitySubmenuTrigger.addEventListener('keydown', (event) => {
+            if (event.key === " " || event.key === "Enter") {
+                event.preventDefault();
+                toggleSubmenu('community');
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && drawer.classList.contains('open')) {
+                toggleDrawer();
+            }
+            languageDropdowns.forEach((dropdown) => {
+                const dropdownContent = dropdown.nextElementSibling;
+                if (event.key === 'Escape' && !dropdownContent.classList.contains('hidden')) {
+                    dropdownContent.classList.add('hidden');
+                }
+            });
+        });
+
+        dropdownNavItems.forEach(item => {
+            const dropdownToggle = item.querySelector('.dropdown-toggle');
+            const isMobile = ("ontouchstart" in document.documentElement);
+            const touchEvent = isMobile ? 'touchend' : 'click';
+
+            if (!isMobile) {
+                item.addEventListener('mouseenter', () => openDeskSubmenu(item));
+                item.addEventListener('mouseleave', () => resetDeskSubmenu(item));
+            } else {
+                // add event listener to the document to close dropdowns when clicking outside of them
+                document.addEventListener('touchend', (event) => {
+                    if (!item.contains(event.target)) {
+                        resetDeskSubmenu(item);
+                    }
+                });
+            }
+
+            dropdownToggle.addEventListener(touchEvent, (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+
+                dropdownNavItems.forEach(_item => {
+                    if (_item !== item) {
+                        resetDeskSubmenu(_item);
+                    }
+                });
+
+                // check if dropdown is open, if so, close it and vice versa
+                if (item.hasAttribute('dropdown--open')) {
+                    resetDeskSubmenu(item);
+                } else {
+                    openDeskSubmenu(item);
+                }
+            });
+        });
+
+        languageDropdowns.forEach((dropdown) => {
+            dropdown.addEventListener('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                const dropdownContent = dropdown.nextElementSibling;
+                dropdownContent.classList.toggle('hidden');
+            });
+        });
+
+        document.addEventListener('click', (event) => {
+            languageDropdowns.forEach((dropdown) => {
+                const dropdownContent = dropdown.nextElementSibling;
+                if (!dropdown.contains(event.target) && !dropdownContent.classList.contains('hidden')) {
+                    dropdownContent.classList.add('hidden');
+                }
+            });
+        });
+    }
+
+    window.addEventListener('load', onload);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var wbar = document.getElementsByTagName('wagtail-userbar');
+        if (wbar[0]) {
+            wbar[0].classList.add('wagtail-user-bar-loading');
+        }
+    });
+
+  })();≈%ùh≤      gÉ˙—gÉ˙—G¿b·gÑ}   ì    O^partitionKey=%28https%2Cgoogleblog.com%29,:https://storage.googleapis.com/gweb-developer-goog-blog-cms-assets/site/20241126-150731/js/dgc_blog.js strongly-framed 1 security-info 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 request-method GET response-head HTTP/2 200 
+x-goog-generation: 1732651665746421
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: identity
+x-goog-stored-content-length: 11117
+x-goog-hash: crc32c=oeoI5w==, md5=We+DSzfcxmQ3czFJ+3IqWA==
+x-goog-storage-class: STANDARD
+accept-ranges: bytes
+content-length: 11117
+x-guploader-uploadid: AFIdbgR445CVCWPjs-oBmfWq473OALu12-3t5mdHhPrN438CRYCF1jIgjUboRMJG0luUXVKmFeXD6is
+server: UploadServer
+date: Sun, 12 Jan 2025 17:05:49 GMT
+expires: Sun, 12 Jan 2025 18:05:49 GMT
+cache-control: public, max-age=3600
+age: 1124
+last-modified: Tue, 26 Nov 2024 20:07:45 GMT
+etag: "59ef834b37dcc66437733149fb722a58"
+content-type: text/javascript
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+X-Firefox-Spdy: h2
+ original-response-headers x-goog-generation: 1732651665746421
+x-goog-metageneration: 1
+x-goog-stored-content-encoding: identity
+x-goog-stored-content-length: 11117
+x-goog-hash: crc32c=oeoI5w==
+x-goog-hash: md5=We+DSzfcxmQ3czFJ+3IqWA==
+x-goog-storage-class: STANDARD
+accept-ranges: bytes
+content-length: 11117
+x-guploader-uploadid: AFIdbgR445CVCWPjs-oBmfWq473OALu12-3t5mdHhPrN438CRYCF1jIgjUboRMJG0luUXVKmFeXD6is
+server: UploadServer
+date: Sun, 12 Jan 2025 17:05:49 GMT
+expires: Sun, 12 Jan 2025 18:05:49 GMT
+cache-control: public, max-age=3600
+age: 1124
+last-modified: Tue, 26 Nov 2024 20:07:45 GMT
+etag: "59ef834b37dcc66437733149fb722a58"
+content-type: text/javascript
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+X-Firefox-Spdy: h2
+ ctid 2 uncompressed-len 0 net-response-time-onstart 269 net-response-time-onstop 272   +m
