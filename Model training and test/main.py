@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from joblib import dump
 import ipaddress
 
-combined_df = pd.read_csv('./all.csv', sep=",") 
+combined_df = pd.read_csv('./Datasets/all.csv', sep=",") 
 labels = pd.array(combined_df['DoH'])
 print (f"the number of DoH packets are {np.count_nonzero(labels == 1)}")
 print(f"number of total packets are {len(labels)}")
@@ -81,5 +81,5 @@ for train_index, test_index in kf.split(shuffled_features):
 
     fold_number += 1
 
-dump(rf, 'RandomForest_fold.joblib')
+dump(rf, './Models/RandomForest_fold.joblib')
 print (f" the accuracies of the random forest is {np.round(random_forest_accuracies,4)} with average of {np.mean(random_forest_accuracies):.4f}")

@@ -4,13 +4,17 @@ from sklearn.model_selection import train_test_split
 from joblib import load, dump
 from sklearn.utils import resample, shuffle
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
+import os
 import ipaddress
 
+current_dir = os.path.dirname(__file__)
+model_path = os.path.join(current_dir, '../Models/New_RandomForest.joblib')
+dataset_path = os.path.join(current_dir, '../Datasets/doh_decrypted_traffic_4.csv')
 
-rf_model = load('RandomForest_features.joblib')
 
-new_dataset = pd.read_csv('doh_decrypted_traffic_3.csv')
+rf_model = load(model_path)
+
+new_dataset = pd.read_csv(dataset_path, sep=",")
 
 new_dataset['SourceIP'] = new_dataset['SourceIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
 new_dataset['DestinationIP'] = new_dataset['DestinationIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
@@ -68,4 +72,4 @@ print(f"Precision: {precision:.2f}")
 print(f"Recall: {recall:.2f}")
 print(f"F1-Score: {f1:.2f}")
 
-dump(rf_model, 'New_RandomForest.joblib')
+dump(rf_model, model_path)

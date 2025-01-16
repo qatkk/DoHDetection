@@ -1,5 +1,6 @@
 import statistics
 import pandas as pd
+import ipaddress
 from joblib import load
 from collections import defaultdict
 from doh_decryptor.context.packet_direction import PacketDirection
@@ -19,7 +20,7 @@ class PacketAnalyzer:
             'response_times': []
         })
 
-        self.model = load('RandomForest_features.joblib')
+        self.model = load('./Models/New_RandomForest.joblib')
 
         #with open(self.output_file, 'w') as output:
         #    output.write("SourceIP,DestinationIP,SourcePort,DestinationPort,TimeStamp,Duration,"
@@ -51,10 +52,12 @@ class PacketAnalyzer:
 
 
         df = pd.DataFrame([data])
-        df[['SIP1', 'SIP2', 'SIP3', 'SIP4']] = df['SourceIP'].apply(lambda ip: pd.Series([int(octet) for octet in ip.split('.')]))
-        df[['DIP1', 'DIP2', 'DIP3', 'DIP4']] = df['DestinationIP'].apply(lambda ip: pd.Series([int(octet) for octet in ip.split('.')]))
-        label = df['DoH']
-        df = df.drop(columns=['TimeStamp', 'DoH', 'SourceIP', 'DestinationIP'], axis=1)
+        df['SourceIP'] = df['SourceIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
+        df['DestinationIP'] = df['DestinationIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
+        label = df['DoH'].iloc[0]
+
+        
+        df = df.drop(columns=['TimeStamp', 'DoH'], axis=1)
 
         prediction = (self.model).predict(df)
 
