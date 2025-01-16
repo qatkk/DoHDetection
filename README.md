@@ -1,4 +1,4 @@
-# DoH Traffic Classification Project
+# DoH Traffic Classification Research
 
 ## Introduction
 
@@ -91,3 +91,35 @@ This project aims to:
 4. Casanova, L. F. G., & Lin, P.-C. (2021). Generalized classification of DNS over HTTPS traffic with deep learning. In *2021 Asia-Pacific Signal and Information Processing Association Annual Summit and Conference (APSIPA ASC)* (pp. 1903-1907). IEEE.
 
 5. Fesl, J., Konopa, M., & Jelínek, J. (2023). A novel deep-learning based approach to DNS over HTTPS network traffic detection. *International Journal of Electrical and Computer Engineering (IJECE)*, 13(6), 6691–6700.
+
+# DoH Traffic Classification Implementation 
+
+## Demo and the Commands
+
+Install the project requirements: 
+pip install -r requirements.txt
+
+Set the interface you'd like to capture on in the file Live Traffic\main.py 
+
+Run the project from the root directory: 
+python3 Live\ Traffic/main.py
+
+To check the prediction from the CMD run the following curl commands : 
+For example.com
+curl -X GET "https://dns.google/dns-query?dns=AAABAAABAAAAAAAAB2V4YW1wbGUDY29tAAABAAE" \
+  -H "Accept: application/dns-message"
+
+For openai.com
+curl -X GET "https://dns.google/dns-query?dns=AAABAAABAAAAAAAAB29wZW5haQNhY29tAAABAAE" \
+  -H "Accept: application/dns-message"
+
+For github.com
+curl -X GET "https://dns.google/dns-query?dns=AAABAAABAAAAAAAAB2dpdGh1YgNjb20AAAEAAQ" \
+  -H "Accept: application/dns-message"
+
+## Project Structure 
+In this project we've trained two different models, KNN and random forest. The main model used in the demo and the project is in the ".\Models folder" but the other trained model can be found in ".\KNN_model" for further backup and adaptability. 
+The main code of the project is in ".\Live Traffic" where traffic is captured live from the set interface and specific features corresponding to the model are being extracted by ".\Live Traffic\doh_decryptor\flow.py".
+After the features are extracted from the live data, the model is applied on the features and prediction is done by ".\Live Traffic\doh_decryptor\packetAnalyzer.py". After the prediction, if DoH detected, the ip table rules are updated to drop the packet from being routed to the LAN. 
+
+In the end the folder ".\Tools" contains toolset developed throughout the project but not used in the demo. You can find automatic browsing by bash, python, and packet labeling by decrypting the TLS packets. 
