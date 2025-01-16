@@ -1,6 +1,7 @@
 import statistics
 import pandas as pd
 import ipaddress
+import subprocess
 from joblib import load
 from collections import defaultdict
 from doh_decryptor.context.packet_direction import PacketDirection
@@ -52,18 +53,30 @@ class PacketAnalyzer:
         with open(self.output_file, 'a') as output:
             output.write(','.join(str(data[key]) for key in data.keys()) + '\n')
 
-
         df = pd.DataFrame([data])
         df['SourceIP'] = df['SourceIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
         df['DestinationIP'] = df['DestinationIP'].apply(lambda ip: int(ipaddress.ip_address(ip)))
-        label = df['DoH'].iloc[0]
+        #label = df['DoH'].iloc[0]
 
         
         df = df.drop(columns=['TimeStamp', 'DoH'], axis=1)
 
         prediction = (self.model).predict(df)
 
-        print(f"Prediction fot the packet is: {prediction}. In fact is {label}")
+        print(f"Prediction fot the packet is: {prediction}.")
+
+        if prediction:
+            try:
+                command = [
+                    "iptables",
+                    "-A", "FORWARD",
+                    "-s", data['SourceIP'],
+                    "-d", data['DestinationIP'],
+                    "-j", "DROP"
+                ]
+                subprocess.run(command, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error at blocking the traffic: {e}")
 
     def process_packets(self, packet_queue):
         while True:
