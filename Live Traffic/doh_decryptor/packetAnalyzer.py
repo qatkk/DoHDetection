@@ -22,18 +22,18 @@ class PacketAnalyzer:
 
         self.model = load('./Models/New_RandomForest.joblib')
 
-        #with open(self.output_file, 'w') as output:
-        #    output.write("SourceIP,DestinationIP,SourcePort,DestinationPort,TimeStamp,Duration,"
-        #                 "FlowBytesSent,FlowSentRate,FlowBytesReceived,FlowReceivedRate,"
-        #                 "PacketLengthVariance,PacketLengthStandardDeviation,PacketLengthMean,"
-        #                 "PacketLengthMedian,PacketLengthMode,PacketLengthSkewFromMedian,"
-        #                 "PacketLengthSkewFromMode,PacketLengthCoefficientofVariation,"
-        #                 "PacketTimeVariance,PacketTimeStandardDeviation,PacketTimeMean,"
-        #                 "PacketTimeMedian,PacketTimeMode,PacketTimeSkewFromMedian,"
-        #                 "PacketTimeSkewFromMode,PacketTimeCoefficientofVariation,"
-        #                 "ResponseTimeVariance,ResponseTimeStandardDeviation,ResponseTimeMean,"
-        #                 "ResponseTimeMedian,ResponseTimeMode,ResponseTimeSkewFromMedian,"
-        #                 "ResponseTimeSkewFromMode,ResponseTimeCoefficientofVariation,Classification\n")
+        with open(self.output_file, 'w') as output:
+            output.write("SourceIP,DestinationIP,SourcePort,DestinationPort,TimeStamp,Duration,"
+                         "FlowBytesSent,FlowSentRate,FlowBytesReceived,FlowReceivedRate,"
+                         "PacketLengthVariance,PacketLengthStandardDeviation,PacketLengthMean,"
+                         "PacketLengthMedian,PacketLengthMode,PacketLengthSkewFromMedian,"
+                         "PacketLengthSkewFromMode,PacketLengthCoefficientofVariation,"
+                         "PacketTimeVariance,PacketTimeStandardDeviation,PacketTimeMean,"
+                         "PacketTimeMedian,PacketTimeMode,PacketTimeSkewFromMedian,"
+                         "PacketTimeSkewFromMode,PacketTimeCoefficientofVariation,"
+                         "ResponseTimeTimeVariance,ResponseTimeTimeStandardDeviation,ResponseTimeTimeMean,"
+                         "ResponseTimeTimeMedian,ResponseTimeTimeMode,ResponseTimeTimeSkewFromMedian,"
+                         "ResponseTimeTimeSkewFromMode,ResponseTimeTimeCoefficientofVariation,Classification\n")
 
     def determine_direction(self, packet):
         forward_key = get_packet_flow_key(packet, PacketDirection.FORWARD)
@@ -49,6 +49,8 @@ class PacketAnalyzer:
     def process_packet(self, packet):
         direction = self.determine_direction(packet)
         data = self.flow_manager.add_packet_to_flow(packet, direction)
+        with open(self.output_file, 'a') as output:
+            output.write(','.join(str(data[key]) for key in data.keys()) + '\n')
 
 
         df = pd.DataFrame([data])
