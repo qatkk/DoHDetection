@@ -41,8 +41,6 @@ train_data, test_data, labels_train, labels_test = train_test_split(
 
 df_train = pd.concat([train_data, labels_train], axis=1)
 
-print("Arriba")
-
 df_majority = df_train[df_train['Classification'] == 0]
 df_minority = df_train[df_train['Classification'] == 1]
 
@@ -60,7 +58,6 @@ df_minority_upsampled = resample(df_minority,
 
 df_balanced = pd.concat([df_majority_downsampled, df_minority_upsampled])
 
-print("Arriba 1")
 df_balanced = df_balanced.sample(frac=1,random_state=42).reset_index(drop=True)
 
 balanced_data = df_balanced.drop(columns=['Classification'])
@@ -68,8 +65,6 @@ balanced_labels = df_balanced['Classification']
 
 #balanced_data = balanced_data.fillna(0)  # Substituir per 0
 knn_model.fit(balanced_data, balanced_labels)
-
-print("Arriba 2")
 
 predictionsKNN = knn_model.predict(test_data)
 knn_accuracy = accuracy_score(labels_test, predictionsKNN)
